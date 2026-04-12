@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "odoo-dev",
+  "description": "Comprehensive Odoo development skills for Copilot CLI and Claude Code — covers Odoo 17.0, 18.0, 19.0 (Community & Enterprise).",
+  "owner": {
+    "name": "halim-23",
+    "url": "https://github.com/halim-23"
+  },
+  "plugins": [
+    {
+      "name": "odoo-dev",
+      "description": "Odoo 17/18/19 development skills: models, views, OWL/JS, migration, ir.cron, mail templates, security, reports, and more.",
+      "source": "./",
+      "category": "development"
+    }
+  ]
+}
