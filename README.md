@@ -1,13 +1,30 @@
 # odoo-dev-plugin
 
-Comprehensive **Odoo development skills** for [GitHub Copilot CLI](https://docs.github.com/copilot/concepts/agents/about-copilot-cli).
+Comprehensive **Odoo development skills** for [GitHub Copilot CLI](https://docs.github.com/copilot/concepts/agents/about-copilot-cli) and [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
 Covers **Odoo 17.0, 18.0, 19.0** — Community & Enterprise — with source-verified, version-accurate knowledge.
 
 ## Install
 
+### GitHub Copilot CLI
+
 ```bash
 copilot plugin install github:halim-23/odoo-dev-plugin
+```
+
+### Claude Code
+
+```bash
+# Step 1 — add this repo as a marketplace (one time)
+claude plugin marketplace add halim-23/odoo-dev-plugin
+
+# Step 2 — install the plugin
+claude plugin install odoo-dev
+```
+
+**Update later:**
+```bash
+claude plugin update odoo-dev
 ```
 
 ## Skills
