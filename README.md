@@ -24,7 +24,7 @@ claude plugin install odoo-dev
 
 **Update later:**
 ```bash
-claude plugin update odoo-dev
+claude plugin update odoo-dev@odoo-dev
 ```
 
 ## Skills

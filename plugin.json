@@ -1,6 +1,6 @@
 {
   "name": "odoo-dev",
-  "description": "Comprehensive Odoo development skills for versions 17.0, 18.0, 19.0 (Community & Enterprise). Covers models, views, modules, controllers, wizards, security, reports, OWL/JS, migration, mail templates, and debugging.",
+  "description": "Comprehensive Odoo development skills for versions 17.0, 18.0, 19.0 (Community & Enterprise). Covers models, views, modules, controllers, wizards, security, reports, OWL/JS, migration, mail templates, portal, and debugging.",
   "version": "1.0.0",
   "author": {
     "name": "abdulhalim"
