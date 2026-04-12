@@ -9,3 +9,4 @@
 @./skills/odoo-migration/SKILL.md
 @./skills/odoo-debug/SKILL.md
 @./skills/odoo-mail-template/SKILL.md
+@./skills/odoo-portal/SKILL.md

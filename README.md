@@ -42,6 +42,7 @@ claude plugin update odoo-dev
 | `/odoo-migration` | OCA migration scripts, `odoo.sh`, on-prem upgrade, v17→v18→v19 |
 | `/odoo-debug` | Logging, shell, profiler, query count, `--dev` modes |
 | `/odoo-mail-template` | XML email templates v17/v18/v19, `t-out`, QWeb, jinja2 |
+| `/odoo-portal` | Portal pages, `CustomerPortal`, `portal.mixin`, chatter in portal, access tokens, v17/v18/v19 diffs |
 
 ## Usage
 
