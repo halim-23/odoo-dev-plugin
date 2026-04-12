@@ -1,0 +1,11 @@
+@./skills/odoo-model/SKILL.md
+@./skills/odoo-view/SKILL.md
+@./skills/odoo-module/SKILL.md
+@./skills/odoo-controller/SKILL.md
+@./skills/odoo-wizard/SKILL.md
+@./skills/odoo-security/SKILL.md
+@./skills/odoo-report/SKILL.md
+@./skills/odoo-js/SKILL.md
+@./skills/odoo-migration/SKILL.md
+@./skills/odoo-debug/SKILL.md
+@./skills/odoo-mail-template/SKILL.md
