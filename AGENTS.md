@@ -10,3 +10,10 @@
 @./skills/odoo-debug/SKILL.md
 @./skills/odoo-mail-template/SKILL.md
 @./skills/odoo-portal/SKILL.md
+@./skills/odoo-accounting/SKILL.md
+@./skills/odoo-testing/SKILL.md
+@./skills/odoo-performance/SKILL.md
+@./skills/odoo-i18n/SKILL.md
+@./skills/odoo-deployment/SKILL.md
+@./skills/odoo-commit/SKILL.md
+@./skills/odoo-senior-architect/SKILL.md

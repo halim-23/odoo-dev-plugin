@@ -43,6 +43,13 @@ claude plugin update odoo-dev@odoo-dev
 | `/odoo-debug` | Logging, shell, profiler, query count, `--dev` modes |
 | `/odoo-mail-template` | XML email templates v17/v18/v19, `t-out`, QWeb, jinja2 |
 | `/odoo-portal` | Portal pages, `CustomerPortal`, `portal.mixin`, chatter in portal, access tokens, v17/v18/v19 diffs |
+| `/odoo-accounting` | `account.move`, `account.move.line`, invoices, payments, taxes, reconciliation, analytic distribution |
+| `/odoo-testing` | `TransactionCase`, `Form` helper, `HttpCase`, tour tests, test tags, mocking, assertions |
+| `/odoo-performance` | N+1 queries, `search_fetch`, `precompute`, `ormcache`, bulk ops, indexes, cron chunking |
+| `/odoo-i18n` | `_()`, `_lt()`, `.po`/`.pot` files, `translate=True`, RTL, `--i18n-export`/`--i18n-import` |
+| `/odoo-deployment` | Odoo.sh, VPS setup, nginx/SSL, systemd, Docker, `odoo.conf`, backup, safe update strategy |
+| `/odoo-commit` | Odoo `[TAG] module: description` format, WHY-focused body, all official tags |
+| `/odoo-senior-architect` | Module architecture, multi-company, integration patterns, state machines, anti-patterns |
 
 ## Usage
 
