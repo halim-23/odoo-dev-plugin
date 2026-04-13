@@ -9,7 +9,7 @@ Covers **Odoo 17.0, 18.0, 19.0** — Community & Enterprise — with source-veri
 ### GitHub Copilot CLI
 
 ```bash
-copilot plugin install github:halim-23/odoo-dev-plugin
+copilot plugin install halim-23/odoo-dev-plugin
 ```
 
 ### Claude Code
