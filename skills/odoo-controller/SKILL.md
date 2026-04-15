@@ -63,12 +63,15 @@ class MyController(http.Controller):
 
 ## Auth Types
 
-| `auth=` | Who can call |
-|---------|-------------|
-| `'user'` | authenticated user (session or API key) |
-| `'public'` | any visitor (env user = public user) |
-| `'none'` | no session — use `sudo()` manually |
-| `'api_key'` (v17+) | API key header `Authorization: Bearer <key>` |
+| `auth=` | Who can call | Version |
+|---------|-------------|---------|
+| `'user'` | authenticated user (session) | all |
+| `'public'` | any visitor (env user = public user) | all |
+| `'none'` | no session — use `sudo()` manually | all |
+| `'api_key'` | API key via `Authorization: Bearer <key>` (legacy alias) | v17 |
+| `'bearer'` | Bearer token auth; falls back to session if no header | v18+ |
+
+> **v17 vs v18+ auth:** In v17, `auth='api_key'` is the token auth mechanism. In v18+, it is replaced/superseded by `auth='bearer'`, which also falls back to a normal session if no `Authorization` header is present. Source: `odoo/http.py` docstring for `route()` in each version.
 
 ## JSON-RPC (Odoo native RPC)
 
@@ -148,8 +151,106 @@ def safe_endpoint(self, **kwargs):
 
 **v17:** `auth='api_key'` officially supported via `res.users.apikeys`.
 **v17:** `type='json'` routes auto-handle CSRF internally; `csrf=False` only needed for external callers.
-**v18:** `request.get_http_params()` helper for mixed GET/POST params.
+**v18:** `request.get_http_params()` helper for merged GET query string + form body params.
+**v18:** `readonly=True` route parameter — opens a cursor on the read-only replica instead of primary DB.
 **v19:** Route caching headers (`@http.route(..., cache=300)`) for public pages.
+
+## v17 vs v18+ URL Routing Differences
+
+### 1. `reroute()` moved from `IrHttp` classmethod → `request` method
+
+```python
+# v17 — classmethod on ir.http (http_routing addon)
+IrHttp.reroute('/path/without/lang')
+
+# v18+ — method on the request object (odoo/http.py)
+request.reroute('/path/without/lang')
+```
+
+Source: `addons/http_routing/models/ir_http.py` (v17 `cls.reroute()`),
+`odoo/http.py:1976` (v18 `Request.reroute()`).
+
+### 2. `slug` / `unslug` / `url_for` / `url_lang` moved from module functions → `ir.http` classmethods
+
+```python
+# v17 — module-level functions
+from odoo.addons.http_routing.models.ir_http import (
+    slug, slugify, unslug, unslug_url,
+    url_for, url_lang, is_multilang_url,
+)
+name = slug(record)
+path = url_for('/my-page')
+multilang = is_multilang_url('/my-page')
+
+# v18+ — classmethods on ir.http (use via env)
+IrHttp = request.env['ir.http']
+name    = IrHttp._slug(record)          # or (id, name) tuple
+path    = IrHttp._url_for('/my-page')
+lang_p  = IrHttp._url_lang('/my-page')
+multilang = IrHttp._is_multilang_url('/my-page')
+text    = IrHttp._slugify('Some Name')
+id, slug_str = IrHttp._unslug('my-record-42')
+```
+
+Source: `addons/http_routing/models/ir_http.py` — v17 has top-level `slug()`, `url_for()`, etc.;
+v18+ moves them under `class IrHttp` as `_slug`, `_url_for`, `_url_lang`, `_is_multilang_url`,
+`_slugify`, `_unslug`, `_unslug_url` (prefixed with `_` to mark as private API).
+
+### 3. `request.lang` type changed: ORM record → `LangData` namedtuple
+
+```python
+# v17 — request.lang is a res.lang ORM record
+lang_code     = request.lang._get_cached('code')      # e.g. 'fr_BE'
+lang_url_code = request.lang._get_cached('url_code')  # e.g. 'fr'
+
+# v18+ — request.lang is a LangData (ReadonlyDict / namedtuple-like)
+lang_code     = request.lang.code      # direct attribute access
+lang_url_code = request.lang.url_code
+```
+
+Source: v17 `addons/http_routing/models/ir_http.py` uses `_get_cached()`;
+v18+ uses `LangData` from `odoo/addons/base/models/res_lang.py` with plain attribute access.
+
+### 4. Cookie access shortcut on `request`
+
+```python
+# v17 — always go through httprequest
+lang_cookie = request.httprequest.cookies.get('frontend_lang')
+
+# v18+ — direct proxy on request
+lang_cookie = request.cookies.get('frontend_lang')
+```
+
+Source: v18 `addons/http_routing/models/ir_http.py` line ~416 uses `request.cookies`.
+
+### 5. `readonly` route parameter (v18+ only)
+
+Routes that only read data can declare `readonly=True` to open a cursor on the
+read-only replica instead of the primary database, reducing load:
+
+```python
+# v18+ only
+@http.route('/api/products', type='json', auth='public', readonly=True)
+def list_products(self, **kwargs):
+    return request.env['product.template'].sudo().search_read([], ['name', 'price'])
+```
+
+`auth='none'` routes default to `readonly=True`. Source: `odoo/http.py` `route()` docstring
+and `_check_and_complete_route_definition()` in v18/v19.
+
+### 6. `res.lang` lookup API changed
+
+```python
+# v17
+code = request.env['res.lang']._lang_get_code(url_lang_str)
+rec  = request.env['res.lang']._lang_get(lang_code)
+
+# v18+
+data = request.env['res.lang']._get_data(url_code=url_lang_str)
+code = data.code   # LangData attribute
+```
+
+Source: `addons/http_routing/models/ir_http.py` `_match()` method in each version.
 
 ## Inherit Existing Controller
 
