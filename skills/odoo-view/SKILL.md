@@ -760,6 +760,10 @@ Source: `form_compiler.js`: `if (parentNode.classList.contains("o_form_sheet")) 
           groups="my_module.group_my_module_manager"/>
 ```
 
+> **URL routing differs by version** — see `odoo-debug` skill "Backend URL Navigation" section.
+> - **v17.0**: `http://host/web#action=<id>&cids=1` (hash-based)
+> - **v18+**: `http://host/odoo/my-model` (path-based)
+
 ---
 
 ## Widget Reference (v17+)

@@ -264,6 +264,22 @@ Record rule complexity rule:
 
 ---
 
+## URL Routing — Breaking Change Between v17 and v18
+
+This is a **cross-cutting architectural difference** that affects controllers, tests, and any hardcoded URLs.
+
+| Version | Routing | Example |
+|---------|---------|---------|
+| **17.0** | Hash-based | `http://host/web#action=my_mod.action_foo&cids=1` |
+| **18.0+** | Path-based | `http://host/odoo/my-model` |
+
+- In v17, the client router reads the URL fragment (`#`). The server always serves `/web`.
+- In v18/19, the server routes path segments (`/odoo/...`) to the correct action.
+- `view_type`, `menu_id`, `res_id` are query params in v17's hash; they are path segments or query params in v18+.
+- **Do not mix them** — `/odoo/payroll` returns 404 in v17; `web#action=...` is ignored in v18+.
+
+---
+
 ## Upgrade & Migration Strategy
 
 ### Version numbering

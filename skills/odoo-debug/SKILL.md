@@ -220,11 +220,55 @@ odoo.__DEBUG__.services['orm']
 odoo.__DEBUG__.services['notification']
 ```
 
+## Backend URL Navigation (Version-Critical)
+
+Odoo changed its URL routing system between versions. **Always use the correct format for the target version.**
+
+### Odoo 17.0 — Hash-based routing
+```
+# Navigate by action ID or XML ID (resolved via /web/action/load)
+http://host/web#action=<action_id>&cids=1
+http://host/web#action=my_module.action_my_model&cids=1
+
+# Navigate to menu (expands the menu and loads its action)
+http://host/web#menu_id=<menu_id>&cids=1
+
+# Combine action + menu (menu highlighted, action loaded)
+http://host/web#action=<action_id>&menu_id=<menu_id>&cids=1
+
+# Debug mode — append to hash or as query param before hash
+http://host/web?debug=1#action=<action_id>&cids=1
+```
+
+### Odoo 18.0 / 19.0 — Path-based routing
+```
+# Path segments derived from model _name (dots → dashes, strip odoo.* prefix)
+http://host/odoo/payroll
+http://host/odoo/employees
+http://host/odoo/my-model/<id>
+
+# Debug mode
+http://host/odoo?debug=1
+http://host/odoo/my-model?debug=assets
+```
+
+> **Do NOT use `/odoo/...` paths in Odoo 17.0** — they are invalid and will 404.
+> **Do NOT use `web#action=...` hash routing in Odoo 18/19** — the hash is ignored.
+
+### Finding IDs at runtime (v17)
+```python
+# In odoo-bin shell or RPC — find action/menu IDs
+env['ir.actions.act_window'].search_read([('res_model','=','my.model')], ['id','name'])
+env['ir.ui.menu'].search_read([('name','ilike','My Menu')], ['id','complete_name'])
+```
+
 ## Version-Specific Debug
 
 **v17:** Debug mode toggle in URL: `?debug=assets` disables bundle minification.
 **v17:** `?debug=tests` runs browser QUnit tests.
+**v17:** URL routing is hash-based (`/web#action=...`) — see "Backend URL Navigation" above.
 **v18:** Built-in query profiler in Settings when debug mode active.
+**v18/v19:** URL routing is path-based (`/odoo/...`) — hash routing no longer works.
 **v19:** `ODOO_DISABLE_ASSETS_CACHE=1` env var forces asset recompilation.
 
 ## Useful One-liners (Shell)
