@@ -94,10 +94,15 @@ fetch('/web/dataset/call_kw', {
 })
 ```
 
-## REST-style JSON endpoint pattern (v17+)
+## REST-style JSON endpoint pattern
 
 ```python
+# v17 — auth='api_key'
 @http.route('/api/v1/my_model', type='json', auth='api_key',
+            methods=['GET', 'POST'], csrf=False, cors='*')
+
+# v18+ — auth='bearer' (falls back to session if no Authorization header)
+@http.route('/api/v1/my_model', type='json', auth='bearer',
             methods=['GET', 'POST'], csrf=False, cors='*')
 def api_my_model(self, **kwargs):
     method = request.httprequest.method
@@ -149,11 +154,15 @@ def safe_endpoint(self, **kwargs):
 
 ## Version Notes
 
-**v17:** `auth='api_key'` officially supported via `res.users.apikeys`.
+**v17:** `auth='api_key'` is the token auth mechanism.
 **v17:** `type='json'` routes auto-handle CSRF internally; `csrf=False` only needed for external callers.
 **v18:** `request.get_http_params()` helper for merged GET query string + form body params.
 **v18:** `readonly=True` route parameter — opens a cursor on the read-only replica instead of primary DB.
-**v19:** Route caching headers (`@http.route(..., cache=300)`) for public pages.
+**v19:** `type='json'` is a **deprecated alias** for `type='jsonrpc'` — use `type='jsonrpc'` in new code.
+Source: `odoo/http.py` `route()` with `DeprecationWarning` in v19.
+**v19:** New `captcha=` route param for captcha validation; `save_session=` controls session cookie
+(defaults to `False` for `auth='bearer'`).
+Source: `odoo/http.py` `route()` docstring in v19.
 
 ## v17 vs v18+ URL Routing Differences
 
@@ -252,15 +261,92 @@ code = data.code   # LangData attribute
 
 Source: `addons/http_routing/models/ir_http.py` `_match()` method in each version.
 
+### 7. Frontend slug regex: ASCII-only → Unicode (v18+)
+
+The `<model(...)>` URL converter uses a slug regex that changed in v18:
+
+```python
+# v17 — middle chars ASCII only: [A-Za-z0-9-_]
+# Matches: my-product-42, some_thing-7
+# Fails:   résumé-10, некий-товар-7 (non-ASCII in middle)
+
+# v18/v19 — middle chars Unicode \w + hyphen: [\w-]
+# Matches: résumé-10, café-99, некий-товар-7  ← NEW
+```
+
+Source: `addons/http_routing/models/ir_http.py` `_UNSLUG_RE` / `_UNSLUG_ROUTE_PATTERN`
+— v17 uses `[A-Za-z0-9-_]`, v18/v19 uses `[\w-]`.
+
 ## Inherit Existing Controller
 
 ```python
+# v17 — Home was re-exported from main.py
 from odoo.addons.web.controllers.main import Home
+
+# v18/v19 — import directly from home.py (main.py no longer re-exports Home)
+from odoo.addons.web.controllers.home import Home
 
 class CustomHome(Home):
     @http.route('/web', type='http', auth='user', website=False)
     def index(self, **kwargs):
-        # Custom logic before
         response = super().index(**kwargs)
         return response
 ```
+
+## Backend URL Patterns (v17 vs v18+)
+
+### v17 — Hash-based (`/web#key=value`)
+
+All backend state lives in the **URL hash fragment** (never sent to server):
+
+```
+/web
+/web#action=263
+/web#action=sale.action_quotations_with_onboarding
+/web#action=263&view_type=form&id=42
+/web#model=res.partner&view_type=list
+```
+
+### v18/v19 — Path-based (`/odoo/...`)
+
+State moves into the **URL pathname**. `/web` still redirects to `/odoo` for backward compat.
+
+```
+/odoo                              # home / dashboard
+/odoo/contacts                     # action with path="contacts"
+/odoo/contacts/42                  # single record
+/odoo/contacts/new                 # new record form
+/odoo/42/contacts                  # nested: parent resId / child action
+/odoo/action-263                   # action by numeric ID (no path field)
+/odoo/action-sale.action_orders    # action by xml_id  (no path field)
+/odoo/res.partner                  # model with dot    (no action)
+/odoo/m-mymodel                    # model without dot (no action)
+/scoped_app/...                    # same paths, PWA standalone mode
+```
+
+**URL segment rules** (`router.js` `pathFromActionState()`):
+
+| Segment | Meaning |
+|---------|---------|
+| `contacts` | `ir.actions.path = 'contacts'` (clean path) |
+| `action-263` | action by numeric id |
+| `action-sale.action_orders` | action by xml_id |
+| `res.partner` | model with a dot |
+| `m-mymodel` | model without a dot |
+| `42` | record id (`resId`) |
+| `new` | new record form |
+
+**Backward compat:** `/web#action=263&id=42` is auto-redirected — `urlToState()` detects
+`/web` pathname, remaps `id→resId` and `view_type=form→resId=new`, then rewrites to `/odoo/...`.
+
+**`ir.actions.path` field (v18+ only)** — gives an action a clean URL segment:
+
+```xml
+<record id="action_contacts" model="ir.actions.act_window">
+    <field name="path">contacts</field>   <!-- /odoo/contacts -->
+</record>
+```
+
+Pattern constraint: `[a-z][a-z0-9_-]*`, unique across all action types.
+Reserved: cannot start with `m-` or `action-`, cannot be `new`.
+Source: `odoo/addons/base/models/ir_actions.py` `_check_path()` in v18/v19.
