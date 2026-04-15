@@ -12,6 +12,15 @@ Covers **Odoo 17.0, 18.0, 19.0** — Community & Enterprise — with source-veri
 copilot plugin install halim-23/odoo-dev-plugin
 ```
 
+**Update later:**
+```bash
+git -C ~/.copilot/installed-plugins/_direct/halim-23--odoo-dev-plugin pull
+```
+
+> Copilot CLI installs plugins as a git clone under
+> `~/.copilot/installed-plugins/_direct/<owner>--<repo>/`, so a plain
+> `git pull` fetches the latest skills without reinstalling.
+
 ### Claude Code
 
 ```bash
