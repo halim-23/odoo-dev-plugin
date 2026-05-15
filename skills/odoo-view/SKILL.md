@@ -730,6 +730,25 @@ Source: `form_compiler.js`: `if (parentNode.classList.contains("o_form_sheet")) 
 
 ## Actions & Menus
 
+> ⚠️ **Odoo 17 (latest patch) — Shorthand tags REMOVED from RelaxNG schema**
+> The following shorthand XML tags are **no longer valid** and cause a load error:
+> `Element odoo has extra content: record`
+>
+> | ❌ Removed shorthand | ✅ Use instead |
+> |---|---|
+> | `<act_window id="..." name="..." res_model="..." binding_model="..." binding_views="..." view_mode="..." target="..."/>` | `<record model="ir.actions.act_window">` with explicit `<field>` children |
+> | `<report string="..." name="..." model="..." file="..."/>` | `<record model="ir.actions.report">` |
+>
+> **`<act_window>` attribute mapping to `<record>` fields:**
+> - `name` → `<field name="name">`
+> - `res_model` → `<field name="res_model">`
+> - `view_mode` → `<field name="view_mode">`
+> - `target` → `<field name="target">`
+> - `binding_model` → `<field name="binding_model_id" ref="module.model_xxx"/>`
+> - `binding_views` → `<field name="binding_view_types">`
+>
+> Never write `<act_window .../>` or `<report .../>` in Odoo 17 code.
+
 ```xml
 <!-- Window action -->
 <record id="action_my_model" model="ir.actions.act_window">
